@@ -1,0 +1,33 @@
+name: fetch-targetdiff-ckpt
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download checkpoint from Zenodo
+        run: |
+          set -euo pipefail
+          curl -L --retry 5 --retry-all-errors --retry-delay 5 \
+            -o targetdiff_pretrained_models.tar.gz \
+            https://zenodo.org/api/records/14041881/files/targetdiff_pretrained_models.tar.gz/content
+          ls -l targetdiff_pretrained_models.tar.gz
+          echo "md5: $(md5sum targetdiff_pretrained_models.tar.gz)"
+          test "$(stat -c%s targetdiff_pretrained_models.tar.gz)" = "56814038"
+          test "$(md5sum targetdiff_pretrained_models.tar.gz | cut -d' ' -f1)" = "012e0beafa4c4218761dc4ddcbcc5014"
+
+      - name: Publish as release asset
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: targetdiff-ckpt-14041881
+          name: TargetDiff checkpoint (Zenodo 14041881)
+          body: |
+            Mirrored for the t2c platform P2 integration.
+            Source: https://zenodo.org/api/records/14041881 (CC-BY-4.0)
+            MD5: 012e0beafa4c4218761dc4ddcbcc5014
+          files: targetdiff_pretrained_models.tar.gz
