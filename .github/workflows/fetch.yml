@@ -2,6 +2,8 @@ name: fetch-targetdiff-ckpt
 
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
 
 permissions:
   contents: write
